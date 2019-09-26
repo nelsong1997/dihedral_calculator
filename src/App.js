@@ -1,26 +1,26 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            property: true
+        }
+    }
+    //this.function = this.function.bind(this);
+    
+
+
+    render() {
+        return (
+            <div>
+                <p>Welcome! Please select a dihedral group.</p>
+                <label>
+                    <i>D<sub>n</sub> , n = </i> <input id="input-n" type="number" style={{display: "inline", width: "50px"}}></input>
+                </label>
+            </div>
+        )
+    }
 }
 
 export default App;
