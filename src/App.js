@@ -4,13 +4,19 @@ class App extends React.Component {
     constructor() {
         super();
         this.state = {
-            N: ""
+            N: "",
+            compInput: ""
         }
         this.NChange = this.NChange.bind(this);
+        this.compInputChange = this.compInputChange.bind(this);
     }
     
     NChange(evnt) {
         this.setState( {N: evnt.target.value} )
+    }
+
+    compInputChange(evnt) {
+        this.setState( {compInput: evnt.target.value} )
     }
 
     displayWelcomeMessage(stringN) {
@@ -93,6 +99,9 @@ class App extends React.Component {
             }
             return (
                 <div>
+                    <p>Input some composition of elements!</p>
+                    <input type="text" placeholder="e.g. s1*r1*s4" onChange={this.compInputChange}/>
+                    {this.displayFormattedInput(this.state.N, this.state.compInput)}
                     <p>List of elements in the group:</p>
                     <div id="the-elements">
                         <div id="rotations">
@@ -105,6 +114,86 @@ class App extends React.Component {
                 </div>
             )
         }
+    }
+
+    displayFormattedInput(stringN, compInput) {
+        let N = Number(stringN)
+        let LHS = "..."
+        let RHSElementType = "..."
+        let RHSElementNumber = null
+        let compInputArray = compInput.split("*")
+        let checkPassed = true;
+        for (let element of compInputArray) {
+            if (compInput === "" || element.length!==2) {
+                checkPassed = false;
+                break
+            }
+            if (
+                !((element[0].toLowerCase()==="r" || element[0].toLowerCase()==="s") &&
+                typeof(Number(element[1]))==="number" &&
+                Number(element[1]) < N)
+            ) {
+                checkPassed = false;
+                break
+            }
+        }
+        if (checkPassed) {
+            LHS = []              //-----------LHS
+            let k = 0
+            for (let element of compInputArray) {
+                LHS.push(
+                    <label key={k}><em>{element[0].toUpperCase()}</em><sub>{element[1]}</sub></label>
+                )
+                LHS.push(
+                    <label key = {k + 1}>○</label>
+                )
+                k = k + 2
+            }
+            LHS = LHS.slice(0,-1)
+
+            let identity = []      //-------------RHS
+            for (let j = 0; j < N; j++) {
+                identity.push(j)    
+            }
+
+            let previousElement = identity;
+            let reverseCompInput = compInputArray.reverse()
+
+            for (let i = 0; i < compInputArray.length; i++) {
+                let newElement = Array(N);
+                let currentElementString = reverseCompInput[i]
+                let currentElement = [];
+
+                if (currentElementString[0].toLowerCase()==="r") { //----transforming string "r2" to element in array form
+                    for (let j = 0; j < N; j++) {
+                        let firstPoint = N - Number(currentElementString[1])
+                        currentElement.push((firstPoint + j)%N)
+                    }
+                } else if (currentElementString[0].toLowerCase()==="s") {
+                    for (let j = 0; j < N; j++) {
+                        let firstPoint = N - Number(currentElementString[1])
+                        currentElement.push((firstPoint - j + N)%N)
+                    }
+                }
+
+                for (let j = 0; j < N; j++) {  //------multiplying the current element by the previous running product
+                    newElement[j] = previousElement[currentElement[j]]
+                }
+                previousElement = newElement;
+            }
+
+            let RHSArray = previousElement
+            RHSElementNumber = (N - RHSArray[0])%N
+            if ((RHSArray[1]-RHSArray[0] + N)%N === 1) {
+                RHSElementType = "R"
+            } else {
+                RHSElementType = "S"
+            }
+        }
+        return(
+            <p>{LHS} = <em>{RHSElementType}</em><sub>{RHSElementNumber}</sub> </p>
+        )
+
     }
 
     render() {
@@ -126,63 +215,22 @@ function dihedralGroup(N) {
     if (N<3) return []
     let returnArray = []
 
-    var n = N;
-
-    function identity(inputArray) {
-        let array;
-        if (!inputArray) {
-            array = []
-            for (let i = 0; i < n; i++) {
-                array.push(i)
-            }
-        } else {
-            array = inputArray
+    for (let i = 0; i < N; i++) {               //rotations
+        let currentElement = []                 //each value of i gives an element
+        for (let j = 0; j < N; j++) {           //each value of j adds a point to the element
+            currentElement.push(((N-i)+j)%N)    //every point in a rotation is 1 greater than the previous point mod N
         }
-        return array
+        returnArray.push(currentElement)
     }
 
-    function rho(inputArray) {
-        let array;
-        if (!inputArray) {
-            array = []
-            for (let i = 0; i < n; i++) {
-                array.push(i)
-            }
-        } else {
-            array = inputArray
+    for (let i = 0; i < N; i++) {                   //symmetries
+        let currentElement = []                     //each value of i gives an element
+        for (let j = 0; j < N; j++) {               //each value of j adds a point to the element
+            currentElement.push(((2*N-i)-j)%N)      //every point in a symmetry is 1 less than the previous point mod N
         }
-        return array.map((num) => (num+n-1)%n)
+        returnArray.push(currentElement)
     }
 
-    function alpha(inputArray) {
-        let array;
-        if (!inputArray) {
-            array = []
-            for (let i = 0; i < n; i++) {
-                array.push(i)
-            }
-        } else {
-            array = inputArray
-        }
-        return array.reverse().map((num) => (num+1)%n)
-    }
-
-    for (let i = 0; i < n; i++) {        //rotations
-        let returnFunction = identity()
-        for (let j = 0; j < i; j++) {        //number of turns
-            returnFunction = rho(returnFunction)
-        }
-        returnArray.push(returnFunction)
-    }
-
-    for (let i = 0; i < n; i++) {        //flips
-        let returnFunction = identity()
-        returnFunction = alpha(returnFunction) //for flips, before we turn a number of times we multiply by alpha
-        for (let j = 0; j < i; j++) {        //number of turns
-            returnFunction = rho(returnFunction)
-        }
-        returnArray.push(returnFunction)
-    }
     return returnArray
 }
 
