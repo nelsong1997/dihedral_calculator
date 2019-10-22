@@ -55,11 +55,13 @@ class App extends React.Component {
             let i = 0;
             for (let element of theGroup) {
                 let elementType;
-                let elementNumber = (N - element[0])%N
+                let elementNumber;
                 if ((element[1]-element[0] + N)%N === 1) {
                     elementType = "R"
+                    elementNumber = (N - element[0])%N
                 } else {
                     elementType = "S"
+                    elementNumber = element[0]
                 }
                 let topLine = []; let bottomLine = Array(element.length)
                 for (let i = 0; i < element.length; i++) {
@@ -122,16 +124,14 @@ class App extends React.Component {
         let RHSElementType = "..."
         let RHSElementNumber = null
         let compInputArray = compInput.split("*")
+
         let checkPassed = true;
         for (let element of compInputArray) {
-            if (compInput === "" || element.length!==2) {
-                checkPassed = false;
-                break
-            }
             if (
-                !((element[0].toLowerCase()==="r" || element[0].toLowerCase()==="s") &&
-                typeof(Number(element[1]))==="number" &&
-                Number(element[1]) < N)
+                element.length < 2 ||
+                !(element[0].toLowerCase()==="r" || element[0].toLowerCase()==="s") ||
+                !(typeof(Number(element.slice(1, element.length)))==="number") ||
+                Number(element.slice(1, element.length)) >= N
             ) {
                 checkPassed = false;
                 break
@@ -142,14 +142,14 @@ class App extends React.Component {
             let k = 0
             for (let element of compInputArray) {
                 LHS.push(
-                    <label key={k}><em>{element[0].toUpperCase()}</em><sub>{element[1]}</sub></label>
+                    <label key={k}><em>{element[0].toUpperCase()}</em><sub>{element.slice(1, element.length)}</sub></label>
                 )
                 LHS.push(
                     <label key = {k + 1}>○</label>
                 )
                 k = k + 2
             }
-            LHS = LHS.slice(0,-1)
+            LHS = LHS.slice(0,-1) //don't include the final o
 
             let identity = []      //-------------RHS
             for (let j = 0; j < N; j++) {
@@ -166,12 +166,12 @@ class App extends React.Component {
 
                 if (currentElementString[0].toLowerCase()==="r") { //----transforming string "r2" to element in array form
                     for (let j = 0; j < N; j++) {
-                        let firstPoint = N - Number(currentElementString[1])
+                        let firstPoint = N - Number(currentElementString.slice(1, currentElementString.length))
                         currentElement.push((firstPoint + j)%N)
                     }
                 } else if (currentElementString[0].toLowerCase()==="s") {
                     for (let j = 0; j < N; j++) {
-                        let firstPoint = N - Number(currentElementString[1])
+                        let firstPoint = Number(currentElementString.slice(1, currentElementString.length))
                         currentElement.push((firstPoint - j + N)%N)
                     }
                 }
@@ -183,11 +183,12 @@ class App extends React.Component {
             }
 
             let RHSArray = previousElement
-            RHSElementNumber = (N - RHSArray[0])%N
             if ((RHSArray[1]-RHSArray[0] + N)%N === 1) {
                 RHSElementType = "R"
+                RHSElementNumber = (N - RHSArray[0])%N
             } else {
                 RHSElementType = "S"
+                RHSElementNumber = RHSArray[0]
             }
         }
         return(
@@ -226,12 +227,36 @@ function dihedralGroup(N) {
     for (let i = 0; i < N; i++) {                   //symmetries
         let currentElement = []                     //each value of i gives an element
         for (let j = 0; j < N; j++) {               //each value of j adds a point to the element
-            currentElement.push(((2*N-i)-j)%N)      //every point in a symmetry is 1 less than the previous point mod N
+            currentElement.push(((2*N+i)-j)%N)      //every point in a symmetry is 1 less than the previous point mod N
         }
         returnArray.push(currentElement)
     }
 
     return returnArray
+}
+
+function compose(secondElement, firstElement, N) { // r1*r2 ... r1 is the second element since the operation happens second
+    let secondElementType = secondElement[0].toLowerCase()
+    let secondElementIndex = Number(secondElement.slice(1, secondElement.length))
+    let firstElementType = firstElement[0].toLowerCase()
+    let firstElementIndex = Number(firstElement.slice(1, firstElement.length))
+
+    let resultType;
+    let resultIndex;
+
+    if (secondElementType===firstElementType) {
+        resultType = "r"
+    } else {
+        resultType = "s"
+    }
+
+    if (secondElementType==="r") {
+        resultIndex = (firstElementIndex + secondElementIndex)%N
+    } else if (secondElementType==="s") {
+        resultIndex = (secondElementIndex - firstElementIndex + N)%N
+    }
+
+    return resultType + resultIndex
 }
 
 export default App;
