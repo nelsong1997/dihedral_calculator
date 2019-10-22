@@ -151,45 +151,18 @@ class App extends React.Component {
             }
             LHS = LHS.slice(0,-1) //don't include the final o
 
-            let identity = []      //-------------RHS
-            for (let j = 0; j < N; j++) {
-                identity.push(j)    
-            }
+            //-------------RHS
 
-            let previousElement = identity;
             let reverseCompInput = compInputArray.reverse()
+            let previousElement = "r0"
 
-            for (let i = 0; i < compInputArray.length; i++) {
-                let newElement = Array(N);
-                let currentElementString = reverseCompInput[i]
-                let currentElement = [];
-
-                if (currentElementString[0].toLowerCase()==="r") { //----transforming string "r2" to element in array form
-                    for (let j = 0; j < N; j++) {
-                        let firstPoint = N - Number(currentElementString.slice(1, currentElementString.length))
-                        currentElement.push((firstPoint + j)%N)
-                    }
-                } else if (currentElementString[0].toLowerCase()==="s") {
-                    for (let j = 0; j < N; j++) {
-                        let firstPoint = Number(currentElementString.slice(1, currentElementString.length))
-                        currentElement.push((firstPoint - j + N)%N)
-                    }
-                }
-
-                for (let j = 0; j < N; j++) {  //------multiplying the current element by the previous running product
-                    newElement[j] = previousElement[currentElement[j]]
-                }
+            for (let element of reverseCompInput) {
+                let newElement = compose(element, previousElement, N)
                 previousElement = newElement;
             }
 
-            let RHSArray = previousElement
-            if ((RHSArray[1]-RHSArray[0] + N)%N === 1) {
-                RHSElementType = "R"
-                RHSElementNumber = (N - RHSArray[0])%N
-            } else {
-                RHSElementType = "S"
-                RHSElementNumber = RHSArray[0]
-            }
+            RHSElementType = previousElement[0].toUpperCase()
+            RHSElementNumber = previousElement.slice(1, previousElement.length)
         }
         return(
             <p>{LHS} = <em>{RHSElementType}</em><sub>{RHSElementNumber}</sub> </p>
