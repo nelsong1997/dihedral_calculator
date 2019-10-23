@@ -33,11 +33,14 @@ class App extends React.Component {
         let N = Number(stringN)
         if (N%1!==0 || (N<3 && stringN!=="") || N.toString()==="NaN") {
             return (
-                <p>Error: Please enter an integer greater than or equal to 3 for <em>n</em></p>
+                <p>Error: Please enter an integer greater than or equal to 3 for <em>n</em>.</p>
             )
         } else if (N>20) {
             return (
-                <p>The <em>n</em> you selected is very large and is currently unsupported. Please enter <em>n</em> less than 21.</p>
+                <div>
+                    {this.displayCompositionInput(this.state.N, this.state.compInput)}
+                    <p>The elements of the group are not listed for <em>n</em> larger than 20. :(</p>
+                </div>
             )
         } else if (stringN==="") {
             return null
@@ -45,10 +48,48 @@ class App extends React.Component {
             let theGroup = dihedralGroup(N)
 
             let pointsArray = []
+            let lineArray = []
             let angle = 0
-            for (let i = 0; i < N; i++) {
-                pointsArray.push(Math.round((50*Math.cos(angle) + 70)) + "," + Math.round((-50*Math.sin(angle) + 70)))
+            for (let i = 0; i < N; i++) {                      
+                pointsArray.push(Math.round((50*Math.cos(angle) + 70)) + "," + Math.round((-50*Math.sin(angle) + 70)))  //creates an array of points that form the polygon
+                lineArray.push(                                                                                         //creates symmetry lines for the symmetries
+                    <polyline
+                    points={Math.round((55*Math.cos(angle/2) + 70)) + "," + Math.round((-55*Math.sin(angle/2) + 70)) + " " +
+                    Math.round((-55*Math.cos(angle/2) + 70)) + "," + Math.round((55*Math.sin(angle/2) + 70))}
+                        fill="none" stroke="rgb(190, 190, 190)" strokeWidth="2px" strokeDasharray="4"
+                    />
+                )
                 angle = angle + (2*Math.PI)/N
+            }
+
+            function symmetryLine(theLine, type) {
+                if (type==="R") {
+                    return null
+                } else {
+                    return theLine
+                }
+            }
+            function theElements(elementArray, n) {
+                if (n<=12) {
+                    return (
+                        <div id="the-elements">
+                            <div id="rotations">
+                                {elementArray.slice(0, N)}
+                            </div>
+                            <div id="symmetries">
+                                {elementArray.slice(N, 2*N)}
+                            </div>
+                        </div>
+                    )
+                } else if (n>12) {
+                    return (
+                        <div id="the-elements">
+                            <div id="all-elements">
+                                {elementArray}
+                            </div>
+                        </div>
+                    )
+                }
             }
 
             let listItems = []
@@ -72,7 +113,7 @@ class App extends React.Component {
                 angle = 0
                 let j = 0
                 for (let point of element) {
-                    textElementArray.push(
+                    textElementArray.push( //creates an array of text elements which are the labels for the points of the polygon
                         <text
                             x={Math.round(60*Math.cos(angle) + 66)} y={Math.round(-60*Math.sin(angle) + 76)}
                             fontFamily="Times New Roman" fontSize="16px" fill="black" key={j}>{point}
@@ -92,6 +133,7 @@ class App extends React.Component {
                         />
                         <svg className="shape" height="140" width="140">
                             <polygon points={pointsArray.join(" ")} style={{fill: "none", stroke: "black", strokeWidth: "1"}} />
+                            {symmetryLine(lineArray[i-N], elementType)}
                             <polygon points="0,0 140,0 140,140 0,140" style={{fill: "none", stroke: "black", strokeWidth: "1"}} />
                             {textElementArray}
                         </svg>
@@ -101,24 +143,15 @@ class App extends React.Component {
             }
             return (
                 <div>
-                    <p>Input some composition of elements!</p>
-                    <input type="text" placeholder="e.g. s1*r1*s4" onChange={this.compInputChange}/>
-                    {this.displayFormattedInput(this.state.N, this.state.compInput)}
+                    {this.displayCompositionInput(this.state.N, this.state.compInput)}
                     <p>List of elements in the group:</p>
-                    <div id="the-elements">
-                        <div id="rotations">
-                            {listItems.slice(0, N)}
-                        </div>
-                        <div id="symmetries">
-                            {listItems.slice(N, 2*N)}
-                        </div>
-                    </div>
+                    {theElements(listItems, N)}
                 </div>
             )
         }
     }
 
-    displayFormattedInput(stringN, compInput) {
+    displayCompositionInput(stringN, compInput) {
         let N = Number(stringN)
         let LHS = "..."
         let RHSElementType = "..."
@@ -165,7 +198,11 @@ class App extends React.Component {
             RHSElementNumber = previousElement.slice(1, previousElement.length)
         }
         return(
-            <p>{LHS} = <em>{RHSElementType}</em><sub>{RHSElementNumber}</sub> </p>
+            <div>
+                <p>Input some composition of elements!</p>
+                <input type="text" placeholder="e.g. s1*r1*s2" onChange={this.compInputChange}/>
+                <p>{LHS} = <em>{RHSElementType}</em><sub>{RHSElementNumber}</sub> </p>
+            </div>
         )
 
     }
