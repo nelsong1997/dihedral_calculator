@@ -146,6 +146,7 @@ class App extends React.Component {
                     {this.displayCompositionInput(this.state.N, this.state.compInput)}
                     <p>List of elements in the group:</p>
                     {theElements(listItems, N)}
+                    {this.displayCayleyTable(N)}
                 </div>
             )
         }
@@ -205,6 +206,69 @@ class App extends React.Component {
             </div>
         )
 
+    }
+
+    displayCayleyTable(n) {
+        let theRotations = []
+        let theSymmetries = []
+        for (let i = 0; i < n; i++) {
+            theRotations.push("R" + i)
+            theSymmetries.push("S" + i)
+        }
+        let theStringGroup = theRotations.concat(theSymmetries)
+
+        console.log(theStringGroup)
+
+        let theRows = []
+        for (let i = 0; i < 2*n+1; i++) {
+            let leftElement;
+            if (i===0) {
+                leftElement = "R0"
+            } else {
+                leftElement = theStringGroup[i-1]
+            }
+            let theColumns = []
+            for (let j = 0; j < 2*n+1; j++) {
+                let result;
+                if (i===0 && j===0) {
+                    result = "○ "
+                } else if (j===0) {
+                    result = compose(leftElement, "R0", n)
+                } else {
+                    result = compose(leftElement, theStringGroup[j-1], n)
+                }
+                let resultType = result[0].toUpperCase()
+                let resultIndex = result.slice(1, result.length)
+                if (i===0 || j===0) {
+                    theColumns.push(
+                        <th key={j}>
+                            <em>{resultType}</em><sub>{resultIndex}</sub>
+                        </th>
+                    )
+                } else {
+                    theColumns.push(
+                        <td key={j}>
+                            <em>{resultType}</em><sub>{resultIndex}</sub>
+                        </td>
+                    )
+                }
+            }
+            theRows.push(
+                <tr key={i}>
+                    {theColumns}
+                </tr>
+            )
+        }
+        return (
+            <div>
+                <p>Here is a nice Cayley Table for <em>D</em><sub>{n}</sub>:</p>
+                <table>
+                    <tbody>
+                        {theRows}
+                    </tbody>
+                </table>
+            </div>
+        )
     }
 
     render() {
