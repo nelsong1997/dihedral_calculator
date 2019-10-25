@@ -5,10 +5,13 @@ class App extends React.Component {
         super();
         this.state = {
             N: "",
-            compInput: ""
+            compInput: "",
+            conjClInput: ""
         }
         this.NChange = this.NChange.bind(this);
         this.compInputChange = this.compInputChange.bind(this);
+        this.conjClInputChange = this.conjClInputChange.bind(this);
+
     }
     
     NChange(evnt) {
@@ -17,6 +20,10 @@ class App extends React.Component {
 
     compInputChange(evnt) {
         this.setState( {compInput: evnt.target.value} )
+    }
+
+    conjClInputChange(evnt) {
+        this.setState( {conjClInput: evnt.target.value} )
     }
 
     displayWelcomeMessage(stringN) {
@@ -147,6 +154,7 @@ class App extends React.Component {
                     <p>List of elements in the group:</p>
                     {theElements(listItems, N)}
                     {this.displayCayleyTable(N)}
+                    {this.displayConjugacyClass(N)}
                 </div>
             )
         }
@@ -209,16 +217,7 @@ class App extends React.Component {
     }
 
     displayCayleyTable(n) {
-        let theRotations = []
-        let theSymmetries = []
-        for (let i = 0; i < n; i++) {
-            theRotations.push("R" + i)
-            theSymmetries.push("S" + i)
-        }
-        let theStringGroup = theRotations.concat(theSymmetries)
-
-        console.log(theStringGroup)
-
+        let theStringGroup = stringGroup(n)
         let theRows = []
         for (let i = 0; i < 2*n+1; i++) {
             let leftElement;
@@ -271,6 +270,54 @@ class App extends React.Component {
         )
     }
 
+    displayConjugacyClass(n) {
+        let maximumLength = (n-1).toString().length + 1
+        let theElement = this.state.conjClInput
+        let LHS = "..."
+        let RHS = "..."
+        let theStringGroup = stringGroup(n)
+        let stringGroupInverses = []
+        let RHSStringSet = []
+        let RHSSet = []
+        for (let i = 0; i < theStringGroup.length; i++) {
+            stringGroupInverses.push(findInverse(theStringGroup[i], n))
+        }
+        if (checkElementValidity(theElement, n)) {
+            for (let i = 0; i < theStringGroup.length; i++) {
+                let j = 2*i
+                let newElement = compose(theStringGroup[i], compose(theElement, stringGroupInverses[i], n), n)
+                console.log(newElement)
+                let newElementType = newElement[0].toUpperCase()
+                let newElementIndex = newElement.slice(1, newElement.length)
+                if (!(RHSStringSet.includes(newElement))) {
+                    RHSStringSet.push(newElement)
+                    RHSSet.push(
+                        <label key={j}>
+                            <em>{newElementType}</em><sub>{newElementIndex}</sub>
+                        </label>
+                    )
+                    RHSSet.push(<label key={j+1}>, </label>)
+                }
+                LHS = []
+                LHS.push(
+                    <label key={i}>
+                        <em>{theElement[0].toUpperCase()}</em><sub>{theElement.slice(1, theElement.length)}</sub>
+                    </label>
+                );
+                RHS = RHSSet.slice(0, -1)
+            }
+        }
+        return (
+            <div>
+                <p>Input an element to find its conjugacy class!</p>
+                <label>
+                    <input type="text" placeholder="e.g. s2" maxLength={maximumLength} onChange={this.conjClInputChange}/>
+                </label>
+                <p>cl({LHS}) = {"{"}{RHS}{"}"}</p>
+            </div>
+        )
+    }
+
     render() {
         return (
             <div>
@@ -305,7 +352,6 @@ function dihedralGroup(N) {
         }
         returnArray.push(currentElement)
     }
-
     return returnArray
 }
 
@@ -331,6 +377,36 @@ function compose(secondElement, firstElement, N) { // r1*r2 ... r1 is the second
     }
 
     return resultType + resultIndex
+}
+
+function checkElementValidity(element, n) {
+    if (typeof(element)!=="string" || element.length < 2 || element.length > ((n-1).toString().length + 1)) return false
+    let elementType = element[0].toLowerCase()
+    let elementIndex = Number(element.slice(1, element.length))
+    if (!(elementType==="r" || elementType==="s") || elementIndex > n - 1) return false
+    return true
+}
+
+function stringGroup(n) {
+    let theRotations = []
+    let theSymmetries = []
+    for (let i = 0; i < n; i++) {
+        theRotations.push("R" + i)
+        theSymmetries.push("S" + i)
+    }
+    return theRotations.concat(theSymmetries)
+}
+
+function findInverse(element, n) {
+    let elementType = element[0].toLowerCase()
+    let elementIndex = Number(element.slice(1, element.length))
+    let theInverse;
+    if (elementType==="r") {
+        theInverse = "R" + (2*n - elementIndex)%n
+    } else if (elementType==="s") {
+        theInverse = "S" + elementIndex
+    }
+    return theInverse
 }
 
 export default App;

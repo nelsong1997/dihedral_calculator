@@ -26,3 +26,11 @@ td, th {
     border-spacing: 0px;
     font-size: 16pt;
 }
+
+th {
+    background-color: rgb(254, 242, 204);
+}
+
+table > tbody > tr:nth-child(1) > th:nth-child(1) {
+    background-color: rgb(230, 230, 230)
+}
