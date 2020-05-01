@@ -135,8 +135,8 @@ class App extends React.Component {
                             <em>{elementType}</em><sub>{elementNumber}</sub>: [{element.join(", ")}]
                         </div>
                         <img
-                            className="permutation" src={'http://latex.codecogs.com/svg.latex?$\\left(\\begin{matrix}' +
-                            topLine.join("&") + '\\\\' + bottomLine.join("&") + '\\end{matrix}\\right)$'} alt="permutation"
+                            className="permutation" src={'http://latex.codecogs.com/svg.latex?\\left(\\begin{matrix}' +
+                            topLine.join("&") + '\\\\' + bottomLine.join("&") + '\\end{matrix}\\right)'} alt="permutation"
                         />
                         <svg className="shape" height="140" width="140">
                             <polygon points={pointsArray.join(" ")} style={{fill: "none", stroke: "black", strokeWidth: "1"}} />
