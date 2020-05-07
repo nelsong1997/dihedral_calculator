@@ -34,7 +34,3 @@ th {
 table > tbody > tr:nth-child(1) > th:nth-child(1) {
     background-color: rgb(230, 230, 230)
 }
-
-p {
-    color: black;
-}
