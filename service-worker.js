@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/dihedral_calculator/precache-manifest.692270f3760ab064c0a3ead0f7af85f6.js"
+  "/dihedral_calculator/precache-manifest.f47c9675bd59c06be9b5fc4437125e36.js"
 );
 
 self.addEventListener('message', (event) => {
