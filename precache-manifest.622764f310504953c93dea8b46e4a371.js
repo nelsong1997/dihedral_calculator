@@ -1,7 +1,11 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "8b4c03cedad59a0e0cbc687bde70a288",
+    "revision": "1a2e7181fcb08cac1b68a75a56389cc0",
     "url": "/dihedral_calculator/index.html"
+  },
+  {
+    "revision": "0a819010c958a4d33d9b",
+    "url": "/dihedral_calculator/static/css/main.14235861.chunk.css"
   },
   {
     "revision": "9e655dfc0adcbbe7c4a0",
@@ -12,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/dihedral_calculator/static/js/2.d2d6fc58.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "9964df86ef3366245fe0",
-    "url": "/dihedral_calculator/static/js/main.5ae288d8.chunk.js"
+    "revision": "0a819010c958a4d33d9b",
+    "url": "/dihedral_calculator/static/js/main.6c2e949a.chunk.js"
   },
   {
     "revision": "0f8c89f40983b3de799b",
